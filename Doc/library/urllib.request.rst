@@ -1247,14 +1247,14 @@ Examples
 In addition to the examples below, more examples are given in
 :ref:`urllib-howto`.
 
-This example gets the python.org main page and displays the first 300 bytes of
-it::
+This example gets the python.org main page and demonstrates that the
+response is gzip-compressed on the server side::
 
    >>> import urllib.request
-   >>> with urllib.request.urlopen('http://www.python.org/') as f:
-   ...     print(f.read(300))
+   >>> with urllib.request.urlopen('https://www.python.org/') as f:
+   ...     print(f.headers['Content-Encoding'])
    ...
-   b'<!doctype html>\n<!--[if lt IE 7]>   <html class="no-js ie6 lt-ie7 lt-ie8 lt-ie9">   <![endif]-->\n<!--[if IE 7]>      <html class="no-js ie7 lt-ie8 lt-ie9">          <![endif]-->\n<!--[if IE 8]>      <html class="no-js ie8 lt-ie9">
+   gzip
 
 Note that urlopen returns a bytes object.  This is because there is no way
 for urlopen to automatically determine the encoding of the byte stream
@@ -1268,29 +1268,25 @@ encoding information.
 
 For additional information, see the W3C document: https://www.w3.org/International/questions/qa-html-encoding-declarations.
 
-As the python.org website uses *utf-8* encoding as specified in its meta tag, we
-will use the same for decoding the bytes object::
+As the python.org website uses *utf-8* encoding as specified in its meta tag, a
+program might first check the response headers; for example::
 
-   >>> with urllib.request.urlopen('http://www.python.org/') as f:
-   ...     print(f.read(100).decode('utf-8'))
+   >>> with urllib.request.urlopen('https://www.python.org/') as f:
+   ...     print(f.headers['Content-Encoding'])
    ...
-   <!doctype html>
-   <!--[if lt IE 7]>   <html class="no-js ie6 lt-ie7 lt-ie8 lt-ie9">   <![endif]-->
-   <!-
+   gzip
 
 It is also possible to achieve the same result without using the
 :term:`context manager` approach::
 
    >>> import urllib.request
-   >>> f = urllib.request.urlopen('http://www.python.org/')
+   >>> f = urllib.request.urlopen('https://www.python.org/')
    >>> try:
-   ...     print(f.read(100).decode('utf-8'))
+   ...     print(f.headers['Content-Encoding'])
    ... finally:
    ...     f.close()
    ...
-   <!doctype html>
-   <!--[if lt IE 7]>   <html class="no-js ie6 lt-ie7 lt-ie8 lt-ie9">   <![endif]-->
-   <!--
+   gzip
 
 In the following example, we are sending a data-stream to the stdin of a CGI
 and reading the data it returns to us. Note that this example will only work
@@ -1352,7 +1348,7 @@ programmatically supplied proxy URLs, and adds proxy authorization support with
 
    opener = urllib.request.build_opener(proxy_handler, proxy_auth_handler)
    # This time, rather than install the OpenerDirector, we use it directly:
-   with opener.open('http://www.example.com/login.html') as f:
+   with opener.open('https://www.example.com/login.html') as f:
       print(f.read().decode('utf-8'))
 
 Adding HTTP headers:
@@ -1361,7 +1357,7 @@ Use the *headers* argument to the :class:`Request` constructor, or::
 
    import urllib.request
    req = urllib.request.Request('http://www.example.com/')
-   req.add_header('Referer', 'http://www.python.org/')
+   req.add_header('Referer', 'https://www.python.org/')
    # Customize the default User-Agent header value:
    req.add_header('User-Agent', 'urllib-example/0.1 (Contact: . . .)')
    with urllib.request.urlopen(req) as f:
@@ -1390,7 +1386,7 @@ containing parameters::
    >>> import urllib.request
    >>> import urllib.parse
    >>> params = urllib.parse.urlencode({'spam': 1, 'eggs': 2, 'bacon': 0})
-   >>> url = "http://www.musi-cal.com/cgi-bin/query?%s" % params
+   >>> url = "https://www.python.org/cgi-bin/query?%s" % params
    >>> with urllib.request.urlopen(url) as f:
    ...     print(f.read().decode('utf-8'))
    ...
@@ -1402,7 +1398,7 @@ from urlencode is encoded to bytes before it is sent to urlopen as data::
    >>> import urllib.parse
    >>> data = urllib.parse.urlencode({'spam': 1, 'eggs': 2, 'bacon': 0})
    >>> data = data.encode('ascii')
-   >>> with urllib.request.urlopen("http://requestb.in/xrbl82xr", data) as f:
+   >>> with urllib.request.urlopen("https://httpbin.org/post", data) as f:
    ...     print(f.read().decode('utf-8'))
    ...
 
@@ -1412,15 +1408,15 @@ environment settings::
    >>> import urllib.request
    >>> proxies = {'http': 'http://proxy.example.com:8080/'}
    >>> opener = urllib.request.build_opener(urllib.request.ProxyHandler(proxies))
-   >>> with opener.open("http://www.python.org") as f:
+   >>> with opener.open("https://www.python.org") as f:
    ...     f.read().decode('utf-8')
    ...
 
 The following example uses no proxies at all, overriding environment settings::
 
    >>> import urllib.request
-   >>> opener = urllib.request.build_opener(urllib.request.ProxyHandler({}}))
-   >>> with opener.open("http://www.python.org/") as f:
+   >>> opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+   >>> with opener.open("https://www.python.org/") as f:
    ...     f.read().decode('utf-8')
    ...
 

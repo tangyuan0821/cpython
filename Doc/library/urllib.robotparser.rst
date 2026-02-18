@@ -91,7 +91,7 @@ class::
 
    >>> import urllib.robotparser
    >>> rp = urllib.robotparser.RobotFileParser()
-   >>> rp.set_url("http://www.musi-cal.com/robots.txt")
+   >>> rp.set_url("https://www.python.org/robots.txt")
    >>> rp.read()
    >>> rrate = rp.request_rate("*")
    >>> rrate.requests
@@ -100,7 +100,7 @@ class::
    20
    >>> rp.crawl_delay("*")
    6
-   >>> rp.can_fetch("*", "http://www.musi-cal.com/cgi-bin/search?city=San+Francisco")
+   >>> rp.can_fetch("*", "https://www.python.org/cgi-bin/search?city=San+Francisco")
    False
-   >>> rp.can_fetch("*", "http://www.musi-cal.com/")
+   >>> rp.can_fetch("*", "https://www.python.org/")
    True
