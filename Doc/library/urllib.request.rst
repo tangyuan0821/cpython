@@ -1252,9 +1252,13 @@ it::
 
    >>> import urllib.request
    >>> with urllib.request.urlopen('https://www.python.org/') as f:
-   ...     print(f.read(300))
-   ...
-   b'<!doctype html>\n<!--[if lt IE 7]>   <html class="no-js ie6 lt-ie7 lt-ie8 lt-ie9">   <![endif]-->\n<!--[if IE 7]>      <html class="no-js ie7 lt-ie8 lt-ie9">          <![endif]-->\n<!--[if IE 8]>      <html class="no-js ie8 lt-ie9">
+   ...     # The response may be compressed (for example, 'gzip').
+   ...     print(f.headers.get('Content-Encoding'))
+   ...     data = f.read()
+   ...     if f.headers.get('Content-Encoding') == 'gzip':
+   ...         import gzip
+   ...         data = gzip.decompress(data)
+   ...     print(data[:300].decode('utf-8', errors='replace'))
 
 Note that urlopen returns a bytes object.  This is because there is no way
 for urlopen to automatically determine the encoding of the byte stream
@@ -1272,11 +1276,14 @@ As the python.org website uses *utf-8* encoding as specified in its meta tag, we
 will use the same for decoding the bytes object::
 
    >>> with urllib.request.urlopen('https://www.python.org/') as f:
-   ...     print(f.read(100).decode('utf-8'))
+   ...     # Check for compression and decode appropriately.
+   ...     enc = f.headers.get('Content-Encoding')
+   ...     data = f.read()
+   ...     if enc == 'gzip':
+   ...         import gzip
+   ...         data = gzip.decompress(data)
+   ...     print(data[:100].decode('utf-8', errors='replace'))
    ...
-   <!doctype html>
-   <!--[if lt IE 7]>   <html class="no-js ie6 lt-ie7 lt-ie8 lt-ie9">   <![endif]-->
-   <!-
 
 It is also possible to achieve the same result without using the
 :term:`context manager` approach::
@@ -1284,13 +1291,14 @@ It is also possible to achieve the same result without using the
    >>> import urllib.request
    >>> f = urllib.request.urlopen('https://www.python.org/')
    >>> try:
-   ...     print(f.read(100).decode('utf-8'))
+   ...     enc = f.headers.get('Content-Encoding')
+   ...     data = f.read()
+   ...     if enc == 'gzip':
+   ...         import gzip
+   ...         data = gzip.decompress(data)
+   ...     print(data[:100].decode('utf-8', errors='replace'))
    ... finally:
    ...     f.close()
-   ...
-   <!doctype html>
-   <!--[if lt IE 7]>   <html class="no-js ie6 lt-ie7 lt-ie8 lt-ie9">   <![endif]-->
-   <!--
 
 In the following example, we are sending a data-stream to the stdin of a CGI
 and reading the data it returns to us. Note that this example will only work
