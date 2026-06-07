@@ -836,12 +836,9 @@ future_add_done_callback(asyncio_state *state, FutureObj *fut, PyObject *arg,
             }
 
             if (fut->fut_callbacks != NULL) {
-                int err = PyList_Append(fut->fut_callbacks, tup);
-                if (err) {
-                    Py_DECREF(tup);
+                if (_PyList_AppendTakeRef(fut->fut_callbacks, tup) < 0) {
                     return NULL;
                 }
-                Py_DECREF(tup);
             }
             else {
                 fut->fut_callbacks = PyList_New(1);
